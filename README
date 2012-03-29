@@ -1,0 +1,3 @@
+adns project from http://www.chiark.greenend.org.uk/~ian/adns/
+
+only added a scons-based build system for static and dynamic libraries.
