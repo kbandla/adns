@@ -1,0 +1,37 @@
+# scons-based build system for adns
+# Kiran Bandla <kbandla@in2void.com>
+
+import os,sys
+
+NAME = 'adns'
+print 'Building %s..'%NAME
+prefix = "/usr/local"
+'''
+We need to have config.h generated. 
+TODO: Fix this by adding a config_h builder to this scons script
+Till then this ugly hack should work
+'''
+os.system("./configure --prefix=%s"%prefix)
+
+
+machine = sys.platform
+
+env = Environment()
+conf = Configure(env)
+env = conf.Finish()
+
+source_directory = 'src/'
+source_files = []
+for source_file in os.listdir(source_directory):
+    if '.c' in source_file:
+        source_files.append(source_directory+source_file)
+
+target_shared = env.SharedLibrary(target = NAME, source = source_files)
+target_static = env.StaticLibrary(target = NAME, source = source_files)
+env.Append(CCFLAGS='-g -Wall -O3')
+
+print 'Building for %s'%sys.platform
+env.Alias("install", env.Install(os.path.join(prefix, "lib"), [target_shared, target_static]))
+
+if 'uninstall' in COMMAND_LINE_TARGETS:
+    env.Command("uninstall", None, Delete(FindInstalledFiles()))
